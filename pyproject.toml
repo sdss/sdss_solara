@@ -24,8 +24,7 @@ dependencies = [
   "sdss-tree>4.0.3",
   "sdss-access>3.0.2",
   "solara>0.25.0",
-  "jdaviz>3.8",
-  #"specutils@git+https://github.com/rileythai/specutils-sdss-loaders.git#egg=sdss-v-loaders"
+  "jdaviz>3.8.2",
 ]
 
 [project.optional-dependencies]

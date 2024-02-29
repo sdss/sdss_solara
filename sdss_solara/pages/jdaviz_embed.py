@@ -133,9 +133,7 @@ This is an auto-generated notebook to access SDSS data, for target {sdssid}, usi
 ```
 pip install -U sdss_access
 pip install -U jdaviz
-pip install specutils@git+https://github.com/rileythai/specutils-sdss-loaders.git#egg=sdss-v-loaders
 ```
-Note: this notebook currently requires a custom fork of the `specutils` package.  This should be temporary and included in a new package release soon.  This notebook requires `sdss_access > 3.0.4`, `jdaviz >= 3.8`, and `specutils > 1.12`.
 
 This notebook attempts to download SDSS data using [sdss_access](https://sdss-access.readthedocs.io/en/latest).  If the data are not public, you will need to setup your [SDSS authentication](https://sdss-access.readthedocs.io/en/latest/auth.html).  If you should have access but do not have credentials, please see the [SDSS Data Access Wiki](https://wiki.sdss.org/display/DATA/Get+Started+with+SDSS+Data), or contact the [SDSS Helpdesk](mailto:helpdesk@sdss.org).
     """
