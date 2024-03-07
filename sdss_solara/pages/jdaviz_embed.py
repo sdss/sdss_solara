@@ -39,13 +39,6 @@ def get_config():
     return config
 
 
-# temp local files
-data = {'spec-015078-59187-4291570940.fits': '/Users/Brian/Work/sdss/sas/sdsswork/bhm/boss/spectro/redux/v6_0_6/spectra/lite/017057/59631/spec-017057-59631-27021598108289694.fits',
-        'spec-101077-59845-27021603187129892.fits': '/Users/Brian/Work/sdss/sas/ipl-3/spectro/boss/redux/v6_1_1/spectra/lite/101077/59845/spec-101077-59845-27021603187129892.fits',
-        'spec-017057-59629-27021598108289694.fits': '/Users/Brian/Work/sdss/sas/ipl-3/spectro/boss/redux/v6_1_1/spectra/lite/017057/59629/spec-017057-59629-27021598108289694.fits',
-        'spec-017057-59611-27021598108289694.fits': '/Users/Brian/Work/sdss/sas/ipl-3/spectro/boss/redux/v6_1_1/spectra/lite/017057/59611/spec-017057-59611-27021598108289694.fits'
-        }
-
 # reactive variables
 spec = solara.reactive(None)
 selected = solara.reactive([])
@@ -105,9 +98,9 @@ def DataLoader():
     """ component for data loading button """
     def load():
         for f in selected.value:
-            label = f'{pathlib.Path(f).stem} 0'
+            label = f'{pathlib.Path(f).stem}'
             if label not in spec.value.app.data_collection.labels:
-                spec.value.load_data(data[f], format='SDSS-V spec multi')
+                spec.value.load_data(filemap.value[f])
 
     solara.Button('Load Data', color='primary', on_click=load)
 
@@ -116,7 +109,7 @@ def get_urls(files, release):
     access = Access(release=release)
     access.remote()
     sasdir = 'sas' if access.access_mode == 'curl' else ''
-    return [access.url('', full=f, sasdir=sasdir) for f in files]
+    return [access.url('', full=f, sasdir=sasdir) for f in files if f]
 
 
 def get_nb(files, release, sdssid):
@@ -234,7 +227,8 @@ def Jdaviz():
         spec.value = Specviz(app)
 
         if filemap.value:
-            spec.value.load_data(data[list(filemap.value.keys())[0]], format='SDSS-V spec multi')
+            val = filemap.value[list(filemap.value.keys())[0]]
+            spec.value.load_data(val)
 
         display(spec.value.app)
 
