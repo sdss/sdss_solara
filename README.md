@@ -16,10 +16,9 @@ cd sdss_solara
 pip install -e .
 ```
 
-This package currently requires a custom fork of the `specutils` package. For now,
-you must install this separately with the following:
+This package also requires the dashboard application, Explorer, available [here](https://www.github.com/sdss/explorer). You can checkout this package and install it in editable mode as well, or install it with the following:
 ```
-pip install specutils@git+https://github.com/rileythai/specutils-sdss-loaders.git#egg=sdss-v-loaders
+pip install git+https://github.com/sdss/explorer.git@main
 ```
 
 
