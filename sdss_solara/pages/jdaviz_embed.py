@@ -162,7 +162,7 @@ access.commit()
 # load the data into Specviz
 spec = Specviz()
 for file in files:
-    spec.load_data(file, format='SDSS-V spec multi')
+    spec.load_data(file)
 
 # display Specviz
 spec.show()
@@ -214,7 +214,7 @@ def Jdaviz():
     }
 
     .jdaviz {
-        height: 50vh !important;
+        height: 100vh !important;
     }
 
     """
