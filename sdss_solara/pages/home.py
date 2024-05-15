@@ -18,5 +18,7 @@ def Home():
 routes = [
     solara.Route(path="/", component=Home, label="Home", layout=Layout),
     solara.Route(path="embed", component=Embed, label="Embed"),
-    solara.Route(path="dashboard", component=Dashboard, label="Dashboard", layout=DashLayout),
+    solara.Route(path="dashboard", layout=DashLayout, children=[
+        solara.Route(path="/", component=Dashboard, label="Dashboard")
+    ]),
 ]
