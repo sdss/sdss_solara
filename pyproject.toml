@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 name = "sdss_solara"
 description = "Solara pages for SDSS"
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 version = "0.1.0dev"
 license = { file = "licenses/LICENSE.rst", content-type = "text/plain" }
 
