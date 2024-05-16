@@ -250,3 +250,5 @@ def Page():
             Notebook()
 
         Jdaviz()
+
+Page()
