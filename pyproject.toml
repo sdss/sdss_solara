@@ -25,6 +25,7 @@ dependencies = [
   "sdss-access>3.0.2",
   "solara>0.30.0",
   "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
+  "photutils==3.11",
   "jdaviz>3.8",
 ]
 
