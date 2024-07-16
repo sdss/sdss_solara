@@ -7,6 +7,7 @@ import requests
 import solara
 
 from sdss_access import Access
+from sdss_solara.components.message import Message, event_handler, set_initial_theme
 
 
 def get_url():
@@ -241,8 +242,12 @@ def Page():
 
     print(params.value)
 
+    # set initial theme
+    set_initial_theme()
+
     with solara.Column():
         solara.Title("Spectral Display")
+        Message(event_update=event_handler)
 
         with solara.Columns([1, 0, 0], style='margin: 0 5px'):
             DataSelect()
