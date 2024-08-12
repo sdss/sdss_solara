@@ -214,10 +214,18 @@ def Jdaviz():
         padding: 0px !important;
     }
 
+    .widget-output {
+        margin: 0;
+    }
+
     .jdaviz {
         height: 100vh !important;
     }
 
+    .v-content.jdaviz__content--not-in-notebook {
+        height: 100vh !important;
+        max-height: 100vh
+    }
     """
 
     solara.Style(css)
@@ -225,6 +233,8 @@ def Jdaviz():
 
         config = get_config()
         app = Application(configuration=config)
+        style_path = pathlib.Path(__file__).parent / 'custom_jdaviz.vue'
+        app._add_style(str(style_path))
         spec.value = Specviz(app)
 
         if filemap.value:
