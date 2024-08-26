@@ -23,7 +23,7 @@ dependencies = [
   "python-dotenv>1.0",
   "sdss-tree>4.0.3",
   "sdss-access>3.0.2",
-  "solara>0.37.0",
+  "solara>1.37.0",
   "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
   "photutils==1.11",
   "jdaviz>3.10",
