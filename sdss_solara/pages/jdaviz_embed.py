@@ -3,6 +3,7 @@ import pathlib
 
 import dotenv
 import nbformat as nbf
+import numpy as np
 import requests
 import solara
 
@@ -190,6 +191,20 @@ def Notebook():
             solara.Button(label='Download Jupyter notebook', color='primary')
 
 
+def smart_resize(specviz):
+    """ placeholder function to resize init data """
+    # get spectra
+    ss = specviz.get_spectra()
+    key = next(iter(ss))
+    spec = ss[key]
+
+    # adjust plot y limits to 99th percentile
+    scale = 1.5
+    plot_options = specviz.plugins['Plot Options']
+    plot_options.y_min.value = np.percentile(spec.flux, 1).value * scale
+    plot_options.y_max.value = np.percentile(spec.flux, 99).value * scale
+
+
 @solara.component
 def Jdaviz():
     """ component for displaying Jdaviz """
@@ -240,6 +255,7 @@ def Jdaviz():
         if filemap.value:
             val = filemap.value[list(filemap.value.keys())[0]]
             spec.value.load_data(val)
+            smart_resize(spec.value)
 
         display(spec.value.app)
 
