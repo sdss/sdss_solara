@@ -64,7 +64,9 @@ def sort_filemap(data: dict) -> dict:
 
     def get_prior(x):
         for i in prefs:
-            return prior[i] if x.startswith(i) else 999
+            if x.startswith(i):
+                return prior[i]
+        return float('inf')
 
     skeys = sorted(data.keys(), key=get_prior)
     return {key: data[key] for key in skeys}
