@@ -1,3 +1,4 @@
+import fnmatch
 import os
 import pathlib
 
@@ -41,6 +42,36 @@ def get_config():
     return config
 
 
+def get_specformat(filepath: str) -> str:
+    """ Get the Spectrum1D format based on the filepath """
+    if fnmatch.fnmatch(filepath, '*apogee/*/dr17/visit*'):
+        return 'APOGEE apVisit'
+    elif fnmatch.fnmatch(filepath, '*apogee/*/dr17/stars*'):
+        return 'APOGEE apStar'
+    elif fnmatch.fnmatch(filepath, '*dr17/eboss/spectro*'):
+        return 'SDSS-III/IV spec'
+    elif fnmatch.fnmatch(filepath, '*astra/*/mwmStar*'):
+        # loads all extensions
+        return 'SDSS-V mwm multi'
+    else:
+        return None
+
+
+def sort_filemap(data: dict) -> dict:
+    """ Sort the filemap by file preference """
+    prefs = ['mwmStar', 'spec', 'apStar']
+    prior = dict(zip(prefs, range(len(prefs))))
+
+    def get_prior(x):
+        for i in prefs:
+            if x.startswith(i):
+                return prior[i]
+        return float('inf')
+
+    skeys = sorted(data.keys(), key=get_prior)
+    return {key: data[key] for key in skeys}
+
+
 # reactive variables
 spec = solara.reactive(None)
 selected = solara.reactive([])
@@ -68,7 +99,7 @@ def DataSelect():
             return []
 
         vals = {pathlib.Path(i).name: i for i in resp.json()['files'].values()}
-        filemap.value = vals if not set(vals) == {''} else {}
+        filemap.value = sort_filemap(vals) if not set(vals) == {''} else {}
         return list(filemap.value.keys())
 
     def get_files():
@@ -85,7 +116,7 @@ def DataSelect():
             selected.value = [all_files.value[0]] if all_files.value else []
         elif sdssid and qp_files:
             print('getting files', sdssid, qp_files)
-            filemap.value = {pathlib.Path(i).name: i for i in qp_files.split(',')}
+            filemap.value = sort_filemap({pathlib.Path(i).name: i for i in qp_files.split(',')})
             all_files.value = list(filemap.value.keys())
             selected.value = [all_files.value[0]] if all_files.value else []
 
@@ -101,8 +132,9 @@ def DataLoader():
     def load():
         for f in selected.value:
             label = f'{pathlib.Path(f).stem}'
-            if label not in spec.value.app.data_collection.labels:
-                spec.value.load_data(filemap.value[f])
+            speclabels = set(i.split(' ', 1)[0] for i in spec.value.app.data_collection.labels)
+            if label not in speclabels:
+                spec.value.load_data(filemap.value[f], format=get_specformat(filemap.value[f]))
 
     solara.Button('Load Data', color='primary', on_click=load)
 
@@ -198,11 +230,16 @@ def smart_resize(specviz):
     key = next(iter(ss))
     spec = ss[key]
 
+    # skip smart resize if the outlier threshold is low
+    threshold = np.abs(np.nanmax(spec.flux)/np.nanmedian(spec.flux)).value
+    if threshold < 100:
+        return
+
     # adjust plot y limits to 99th percentile
     scale = 1.5
     plot_options = specviz.plugins['Plot Options']
-    plot_options.y_min.value = np.percentile(spec.flux, 1).value * scale
-    plot_options.y_max.value = np.percentile(spec.flux, 99).value * scale
+    plot_options.y_min.value = np.nanpercentile(spec.flux, 1).value * scale
+    plot_options.y_max.value = np.nanpercentile(spec.flux, 99).value * scale
 
 
 @solara.component
@@ -253,8 +290,9 @@ def Jdaviz():
         spec.value = Specviz(app)
 
         if filemap.value:
-            val = filemap.value[list(filemap.value.keys())[0]]
-            spec.value.load_data(val)
+            label = list(filemap.value.keys())[0]
+            val = filemap.value[label]
+            spec.value.load_data(val, format=get_specformat(val))
             smart_resize(spec.value)
 
         display(spec.value.app)
