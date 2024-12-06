@@ -24,11 +24,11 @@ dependencies = [
   "sdss-tree>4.0.3",
   "sdss-access>3.0.2",
   "markdown",
-  "solara[all]>1.39.0",
-  "solara-ui[all]>1.39.0",
+  "solara[all]>1.41.0",
+  "solara-ui[all]>1.41.0",
   "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
   "photutils>1.13",
-  "jdaviz>3.10",
+  "jdaviz>4.0",
 ]
 
 [project.optional-dependencies]
