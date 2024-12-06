@@ -52,7 +52,7 @@ def get_specformat(filepath: str) -> str:
         return 'SDSS-III/IV spec'
     elif fnmatch.fnmatch(filepath, '*astra/*/mwmStar*'):
         # loads all extensions
-        return 'SDSS-V mwm multi'
+        return 'SDSS-V mwm'
     else:
         return None
 
