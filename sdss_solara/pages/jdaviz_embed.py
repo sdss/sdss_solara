@@ -53,6 +53,9 @@ def get_specformat(filepath: str) -> str:
     elif fnmatch.fnmatch(filepath, '*astra/*/mwmStar*'):
         # loads all extensions
         return 'SDSS-V mwm'
+    elif fnmatch.fnmatch(filepath, '*astra/*/mwmVisit*'):
+        # loads all extensions
+        return 'SDSS-V mwm'
     else:
         return None
 
@@ -133,8 +136,9 @@ def DataLoader():
         for f in selected.value:
             label = f'{pathlib.Path(f).stem}'
             speclabels = set(i.split(' ', 1)[0] for i in spec.value.app.data_collection.labels)
+            lal = True if 'mwmVisit' in label or 'apVisit' in label else False
             if label not in speclabels:
-                spec.value.load_data(filemap.value[f], format=get_specformat(filemap.value[f]))
+                spec.value.load_data(filemap.value[f], format=get_specformat(filemap.value[f]), load_as_list=lal)
 
     solara.Button('Load Data', color='primary', on_click=load)
 
@@ -292,7 +296,8 @@ def Jdaviz():
         if filemap.value:
             label = list(filemap.value.keys())[0]
             val = filemap.value[label]
-            spec.value.load_data(val, format=get_specformat(val))
+            lal = True if 'mwmVisit' in label or 'apVisit' in label else False
+            spec.value.load_data(val, format=get_specformat(val), load_as_list=lal)
             smart_resize(spec.value)
 
         display(spec.value.app)
@@ -302,7 +307,7 @@ def Jdaviz():
 def Page():
     """ main page component """
     router = solara.use_router()
-    params.value = dict(i.split('=') for i in router.search.split('&')) if router.search else {}
+    params.value = dict(i.split('=', 1) for i in router.search.split('&')) if router.search else {}
 
     print(params.value)
 
