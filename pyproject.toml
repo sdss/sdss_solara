@@ -28,7 +28,7 @@ dependencies = [
   "solara-ui[all]>1.41.0",
   "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
   "photutils>1.13",
-  "jdaviz>4.0",
+  "jdaviz>4.1",
 ]
 
 [project.optional-dependencies]
