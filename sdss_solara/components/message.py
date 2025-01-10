@@ -29,6 +29,6 @@ def event_handler(data: dict):
 
 def set_initial_theme():
     router = solara.use_router()
-    params = dict(i.split('=') for i in router.search.split('&')) if router.search else {}
+    params = dict(i.split('=', 1) for i in router.search.split('&')) if router.search else {}
     theme = params.get('theme')
     check_theme(theme)

@@ -307,7 +307,7 @@ def Jdaviz():
 def Page():
     """ main page component """
     router = solara.use_router()
-    params.value = dict(i.split('=') for i in router.search.split('&')) if router.search else {}
+    params.value = dict(i.split('=', 1) for i in router.search.split('&')) if router.search else {}
 
     print(params.value)
 
