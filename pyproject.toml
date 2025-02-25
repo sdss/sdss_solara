@@ -26,7 +26,7 @@ dependencies = [
   "markdown",
   "solara[all]>1.41.0",
   "solara-ui[all]>1.41.0",
-  "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
+  "sdss-explorer",
   "photutils>1.13",
   "jdaviz>4.1",
 ]
@@ -99,3 +99,6 @@ exclude_lines = [
   # Don't complain about IPython completion helper
   "def _ipython_key_completions_",
 ]
+
+[tool.uv.sources]
+sdss-explorer = { git = "ssh://git@github.com/sdss/explorer", branch = "crossmatch-docs-vue" }
