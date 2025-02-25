@@ -20,15 +20,16 @@ authors = [
 ]
 
 dependencies = [
-  "python-dotenv>1.0",
-  "sdss-tree>4.0.3",
-  "sdss-access>3.0.2",
-  "markdown",
-  "solara[all]>=1.42.0,<1.43.0",
-  "solara-ui[all]>=1.42.0,<1.43.0",
-  "sdss-explorer@git+https://github.com/sdss/explorer.git#egg-crossmatch-docs-vue",
-  "photutils>1.13",
-  "jdaviz>4.1",
+    "python-dotenv>1.0",
+    "sdss-tree>4.0.3",
+    "sdss-access>3.0.2",
+    "markdown",
+    "solara[all]>=1.42.0,<1.43.0",
+    "solara-ui[all]>=1.42.0,<1.43.0",
+    "sdss-explorer @ git+https://github.com/sdss/explorer.git@crossmatch-docs-vue",
+    "photutils>1.13",
+    "jdaviz>4.1",
+    "git+https://github.com/sdss/explorer.git@crossmatch-docs-vue",
 ]
 
 [project.optional-dependencies]
@@ -99,6 +100,3 @@ exclude_lines = [
   # Don't complain about IPython completion helper
   "def _ipython_key_completions_",
 ]
-
-[tool.uv.sources]
-sdss-explorer = { git = "ssh://git@github.com/sdss/explorer", branch = "crossmatch-docs-vue" }
