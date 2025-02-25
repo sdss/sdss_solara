@@ -29,7 +29,6 @@ dependencies = [
     "sdss-explorer @ git+https://github.com/sdss/explorer.git@crossmatch-docs-vue",
     "photutils>1.13",
     "jdaviz>4.1",
-    "git+https://github.com/sdss/explorer.git@crossmatch-docs-vue",
 ]
 
 [project.optional-dependencies]
