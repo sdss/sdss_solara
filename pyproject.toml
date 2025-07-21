@@ -29,6 +29,7 @@ dependencies = [
   "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=main",
   "photutils>1.13",
   "jdaviz>4.1",
+  "specutils@git+https://github.com/havok2063/specutils.git#egg=v120_sdssmwmfix",
 ]
 
 [project.optional-dependencies]
