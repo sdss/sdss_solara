@@ -50,12 +50,22 @@ def get_specformat(filepath: str) -> str:
         return 'APOGEE apStar'
     elif fnmatch.fnmatch(filepath, '*dr17/eboss/spectro*'):
         return 'SDSS-III/IV spec'
+    elif fnmatch.fnmatch(filepath, '*dr17/sdss/spectro*'):
+        return 'SDSS-III/IV spec'
+    elif fnmatch.fnmatch(filepath, '*boss/redux/v6*'):
+        return 'SDSS-V spec'
     elif fnmatch.fnmatch(filepath, '*astra/*/mwmStar*'):
         # loads all extensions
         return 'SDSS-V mwm'
     elif fnmatch.fnmatch(filepath, '*astra/*/mwmVisit*'):
         # loads all extensions
         return 'SDSS-V mwm'
+    elif fnmatch.fnmatch(filepath, '*dr17/manga/*LOGCUBE*'):
+        # loads all extensions
+        return 'MaNGA cube'
+    elif fnmatch.fnmatch(filepath, '*dr17/manga/*LOGRSS*'):
+        # loads all extensions
+        return 'MaNGA rss'
     else:
         return None
 
