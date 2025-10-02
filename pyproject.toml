@@ -26,7 +26,7 @@ dependencies = [
   "markdown",
   "solara[all]>1.41.0",
   "solara-ui[all]>1.41.0",
-  "sdss-explorer @ git+https://github.com/sdss/explorer.git@cfe8f1148f6c5549e351253a35424813c94cfab5",
+  "sdss-explorer @ git+https://github.com/sdss/explorer.git@py12",
   "photutils>1.13",
   "jdaviz>4.1",
 ]
