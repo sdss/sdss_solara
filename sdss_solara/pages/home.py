@@ -7,12 +7,14 @@ from sdss_solara.components.message import Message, event_handler, set_initial_t
 
 @solara.component
 def Layout(children=[]):
+    """core layout component"""
     # there will only be 1 child, which is the Page()
     return children[0]
 
 
 @solara.component
 def Home():
+    """main home page"""
     solara.Markdown("SDSS Solara Home")
     Message(event_update=event_handler)
 
@@ -37,4 +39,3 @@ routes = [
         ],
     ),
 ]
-

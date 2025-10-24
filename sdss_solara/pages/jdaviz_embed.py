@@ -146,7 +146,7 @@ def DataLoader():
         for f in selected.value:
             label = f'{pathlib.Path(f).stem}'
             speclabels = set(i.split(' ', 1)[0] for i in spec.value.app.data_collection.labels)
-            lal = True if 'mwmVisit' in label or 'apVisit' in label else False
+            lal = True if label.startswith(('mwmVisit', 'mwmStar')) or 'apVisit' in label else False
             if label not in speclabels:
                 spec.value.load_data(filemap.value[f], format=get_specformat(filemap.value[f]), load_as_list=lal)
 
@@ -306,7 +306,7 @@ def Jdaviz():
         if filemap.value:
             label = list(filemap.value.keys())[0]
             val = filemap.value[label]
-            lal = True if 'mwmVisit' in label or 'apVisit' in label else False
+            lal = True if label.startswith(('mwmVisit', 'mwmStar')) or 'apVisit' in label else False
             spec.value.load_data(val, format=get_specformat(val), load_as_list=lal)
             smart_resize(spec.value)
 
