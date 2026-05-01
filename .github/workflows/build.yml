@@ -28,10 +28,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install build dependencies
+      - name: Install packaging tools
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
       - name: Build package
         run: python -m build
+
+      - name: Install package from pyproject.toml
+        run: python -m pip install .
+
+      - name: Verify package import
+        run: python -c "import sdss_solara; print(sdss_solara.__name__)"
