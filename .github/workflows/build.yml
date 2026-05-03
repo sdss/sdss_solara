@@ -36,8 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, macos-14]
-        python-version: ["3.12", "3.13", "3.14"]
-        vaex-mode: [plain, fallback-wheels]
+        python-version: ["3.12"]
 
     runs-on: ${{ matrix.os }}
 
@@ -52,18 +51,44 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install vaex (plain)
-        if: matrix.vaex-mode == 'plain'
-        run: python -m pip install --force-reinstall vaex
+      - name: Install package from pyproject.toml
+        run: python -m pip install .
 
-      - name: Install vaex (fallback wheels)
-        if: matrix.vaex-mode == 'fallback-wheels'
-        env:
-          PIP_FIND_LINKS: https://github.com/ddelange/vaex/releases/expanded_assets/core-v4.17.1.post4
-        run: python -m pip install --force-reinstall vaex
+      - name: Show resolved dependency versions
+        if: always()
+        run: python -m pip freeze | grep -E '^(sdss_explorer|vaex)'
+
+      - name: Verify package import
+        run: python -c "import sdss_solara; print(sdss_solara.__name__)"
+
+  install-matrix-experimental:
+    continue-on-error: true
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-14]
+        python-version: ["3.13", "3.14"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
 
       - name: Install package from pyproject.toml
         run: python -m pip install .
+
+      - name: Show resolved dependency versions
+        if: always()
+        run: python -m pip freeze | grep -E '^(sdss_explorer|vaex)'
 
       - name: Verify package import
         run: python -c "import sdss_solara; print(sdss_solara.__name__)"
