@@ -37,6 +37,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-14]
         python-version: ["3.12", "3.13", "3.14"]
+        vaex-mode: [plain, fallback-wheels]
 
     runs-on: ${{ matrix.os }}
 
@@ -47,6 +48,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install vaex (plain)
+        if: matrix.vaex-mode == 'plain'
+        run: python -m pip install --force-reinstall vaex
+
+      - name: Install vaex (fallback wheels)
+        if: matrix.vaex-mode == 'fallback-wheels'
+        env:
+          PIP_FIND_LINKS: https://github.com/ddelange/vaex/releases/expanded_assets/core-v4.17.1.post4
+        run: python -m pip install --force-reinstall vaex
 
       - name: Install package from pyproject.toml
         run: python -m pip install .
