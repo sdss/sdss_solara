@@ -14,7 +14,7 @@ from specutils import Spectrum, SpectrumList
 from ipypopout import PopoutButton
 
 from sdss_solara.components.common import create_shared_widgets, css
-from sdss_solara.components.message import Message, event_handler, set_initial_theme
+from sdss_solara.components.message import Message, event_handler, outmsg, set_initial_theme
 
 
 def local_check():
@@ -329,12 +329,12 @@ def Page():
     target_model_id = solara.use_reactive("")
 
     # set initial theme
-    set_initial_theme()
+    set_initial_theme(params)
 
     solara.Style(css)
     with solara.Column() as control:
         solara.Title("Spectral Display")
-        Message(event_update=event_handler)
+        Message(event_update=event_handler, outgoing=outmsg.value)
 
         with solara.Columns([1, 0, 0], style="margin: 0 5px"):
             DataSelect()
