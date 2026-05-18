@@ -12,6 +12,7 @@ from jdaviz import Specviz
 from jdaviz.app import Application
 from sdss_access import Access
 from specutils import Spectrum, SpectrumList
+from ipypopout import PopoutButton
 
 from sdss_solara.components.common import create_shared_widgets, css
 from sdss_solara.components.message import Message, event_handler, set_initial_theme
@@ -407,11 +408,14 @@ def Page():
 
     print(params.value)
 
+    # set the target popout model id
+    target_model_id = solara.use_reactive("")
+
     # set initial theme
     set_initial_theme()
 
     solara.Style(css)
-    with solara.Column():
+    with solara.Column() as control:
         solara.Title("Spectral Display")
         Message(event_update=event_handler)
 
@@ -419,8 +423,15 @@ def Page():
             DataSelect()
             DataLoader()
             Notebook()
+            # Add the popout button to the toolbar
+            if target_model_id.value:
+                with solara.Tooltip("Pop out the spectral viewer into a new window."):
+                    with solara.Column():
+                        PopoutButton.element(target_model_id=target_model_id.value, window_features='popup,width=1200,height=800')
 
         Jdaviz()
 
+    # with solara we have to use use_effect + get_widget to get the widget id
+    solara.use_effect(lambda: target_model_id.set(solara.get_widget(control)._model_id))
 
 Page()
