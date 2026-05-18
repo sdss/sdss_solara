@@ -211,7 +211,7 @@ def DataSelect():
         elif sdssid and qp_files:
             print("getting files", sdssid, qp_files)
             filemap.value = sort_filemap(
-                {make_label(i): i for i in qp_files.split(",")}
+                {make_label(i): i for i in qp_files.split(",") if check_file_exists(i, release)}
             )
             all_files.value = list(filemap.value.keys())
             selected.value = [all_files.value[0]] if all_files.value else []
@@ -255,6 +255,12 @@ def DataLoader():
                 load_data(spec.value, filemap.value[f])
 
     solara.Button("Load Data", color="primary", on_click=load)
+
+
+def check_file_exists(filepath: str, release: str) -> bool:
+    """ Add a file check existence """
+    access = Access(release=release)
+    return access.exists('', full=filepath)
 
 
 def get_urls(files: list, release: str):
