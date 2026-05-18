@@ -4,7 +4,6 @@ import pathlib
 import urllib
 
 import dotenv
-import nbformat as nbf
 import numpy as np
 import requests
 import solara
@@ -12,6 +11,7 @@ from jdaviz import Specviz
 from jdaviz.app import Application
 from sdss_access import Access
 from specutils import Spectrum, SpectrumList
+from ipypopout import PopoutButton
 
 from sdss_solara.components.common import create_shared_widgets, css
 from sdss_solara.components.message import Message, event_handler, set_initial_theme
@@ -265,88 +265,6 @@ def get_urls(files: list, release: str):
     return [access.url("", full=f, sasdir=sasdir) for f in files if f]
 
 
-def get_nb(files: list, release: str, sdssid: str):
-    """Create a dynamic notebook"""
-    # get the urls to render
-    urls = get_urls(files, release)
-
-    nb = nbf.v4.new_notebook()
-
-    # intro cell
-    text = f"""\
-# Jdaviz notebook
-This is an auto-generated notebook to access SDSS data, for target {sdssid}, using the [jdaviz](https://jdaviz.readthedocs.io/en/latest/) Python package.  It is recommended to run this in a Python virtual environment, e.g. **pyenv** or **miniconda**.  If you don't have the packages already installed, please run:
-```
-pip install -U sdss_access
-pip install -U jdaviz
-```
-
-This notebook attempts to download SDSS data using [sdss_access](https://sdss-access.readthedocs.io/en/latest).  If the data are not public, you will need to setup your [SDSS authentication](https://sdss-access.readthedocs.io/en/latest/auth.html).  If you should have access but do not have credentials, please see the [SDSS Data Access Wiki](https://wiki.sdss.org/display/DATA/Get+Started+with+SDSS+Data), or contact the [SDSS Helpdesk](mailto:helpdesk@sdss.org).
-    """
-
-    # code import cell
-    code = """\
-import os
-from sdss_access import Access
-from jdaviz import Specviz
-    """
-
-    # code cell for data access
-    code2 = f"""\
-# set up sdss-access and download files
-access = Access(release="{release}")
-access.remote()
-
-# set the local filepaths
-urls = {urls}
-for url in urls:
-    access.add_file(url, input_type='url')
-
-# set the files in the stream; get the filepaths to load
-access.set_stream()
-files = access.get_paths()
-
-# download the files
-access.commit()
-    """
-
-    # code cell for loading data into Jdaviz
-    code3 = """\
-# load the data into Specviz
-spec = Specviz()
-for file in files:
-    spec.load_data(file)
-
-# display Specviz
-spec.show()
-    """
-
-    # add the cells
-    nb["cells"] = [
-        nbf.v4.new_markdown_cell(text),
-        nbf.v4.new_code_cell(code),
-        nbf.v4.new_code_cell(code2),
-        nbf.v4.new_code_cell(code3),
-    ]
-
-    return nbf.writes(nb)
-
-
-@solara.component
-def Notebook():
-    """component for download a Jupyter notebook"""
-    files = list(filemap.value.values())
-    sdssid = params.value.get("sdssid")
-    nbobj = get_nb(files, params.value.get("release"), sdssid)
-    with solara.FileDownload(
-        nbobj,
-        f"sdss_jdaviz_notebook_{sdssid}.ipynb",
-        mime_type="application/x-ipynb+json",
-    ):
-        with solara.Tooltip("Download a Jdaviz Jupyter notebook for these data"):
-            solara.Button(label="Download Jupyter notebook", color="primary")
-
-
 def smart_resize(specviz):
     """placeholder function to resize init data"""
     # get spectra
@@ -407,20 +325,29 @@ def Page():
 
     print(params.value)
 
+    # set the target popout model id
+    target_model_id = solara.use_reactive("")
+
     # set initial theme
     set_initial_theme()
 
     solara.Style(css)
-    with solara.Column():
+    with solara.Column() as control:
         solara.Title("Spectral Display")
         Message(event_update=event_handler)
 
         with solara.Columns([1, 0, 0], style="margin: 0 5px"):
             DataSelect()
             DataLoader()
-            Notebook()
+            # Add the popout button to the toolbar
+            if target_model_id.value:
+                with solara.Tooltip("Pop out the spectral viewer into a new window."):
+                    with solara.Column():
+                        PopoutButton.element(target_model_id=target_model_id.value, window_features='popup,width=1200,height=800')
 
         Jdaviz()
 
+    # with solara we have to use use_effect + get_widget to get the widget id
+    solara.use_effect(lambda: target_model_id.set(solara.get_widget(control)._model_id))
 
 Page()
