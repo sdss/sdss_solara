@@ -16,6 +16,9 @@ export default {
     },
     mounted() {
         window.addEventListener('message', this.handleMessage)
+
+        // post a ready message back to the parent
+        window.parent.postMessage('ready', this.parentOrigin)
     },
     beforeUnmount() {
         window.removeEventListener('message', this.handleMessage)
