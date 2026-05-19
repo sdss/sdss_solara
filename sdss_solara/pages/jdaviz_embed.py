@@ -14,7 +14,13 @@ from specutils import Spectrum, SpectrumList
 from ipypopout import PopoutButton
 
 from sdss_solara.components.common import create_shared_widgets, css
-from sdss_solara.components.message import Message, event_handler, outmsg, set_initial_theme
+from sdss_solara.components.message import (
+    Message,
+    event_handler,
+    new_files,
+    outmsg,
+    set_initial_theme,
+)
 
 
 def local_check():
@@ -129,6 +135,7 @@ def sort_filemap(data: dict) -> dict:
 # reactive variables
 spec = solara.reactive(None)
 selected = solara.reactive([])
+all_files = solara.reactive([])
 filemap = solara.reactive({})
 params = solara.reactive({})
 
@@ -168,11 +175,16 @@ def make_label(filepath):
         return stem
 
 
+def sync_file_state():
+    """Keep all_files and selected aligned with the current filemap."""
+    all_files.value = list(filemap.value.keys())
+    current_selected = [i for i in selected.value if i in filemap.value]
+    selected.value = current_selected or ([all_files.value[0]] if all_files.value else [])
+
+
 @solara.component
 def DataSelect():
     """component for a dropdown select menu"""
-    all_files = solara.use_reactive([])
-
     sdssid = params.value.get("sdssid", "")
     release = params.value.get("release", "IPL3")
     qp_files = params.value.get("files", "")
@@ -194,27 +206,24 @@ def DataSelect():
 
         vals = {make_label(i): i for i in resp.json()["files"].values()}
         filemap.value = sort_filemap(vals) if not set(vals) == {""} else {}
-        return list(filemap.value.keys())
+        sync_file_state()
+        return list(all_files.value)
 
     def get_files():
         """get the spectral data files"""
         if filemap.value:
-            all_files.value = list(filemap.value.keys())
-            selected.value = [all_files.value[0]] if all_files.value else []
+            sync_file_state()
             return
 
         if sdssid and not qp_files:
             res = make_request()
             print("finished req", res)
-            all_files.value = res or []
-            selected.value = [all_files.value[0]] if all_files.value else []
         elif sdssid and qp_files:
             print("getting files", sdssid, qp_files)
             filemap.value = sort_filemap(
                 {make_label(i): i for i in qp_files.split(",") if check_file_exists(i, release)}
             )
-            all_files.value = list(filemap.value.keys())
-            selected.value = [all_files.value[0]] if all_files.value else []
+            sync_file_state()
 
     if not all_files.value:
         get_files()
@@ -222,7 +231,7 @@ def DataSelect():
     solara.SelectMultiple("Select Data Files", selected, all_files.value, dense=True)
 
 
-def load_data(app: Application, filename: str):
+def load_data(app: Application, filename: str, resize: bool = False):
     """Load the data into Jdaviz"""
     label = make_label(filename)
     lal = (
@@ -233,12 +242,20 @@ def load_data(app: Application, filename: str):
         else False
     )
 
+    if not os.path.exists(filename):
+        print('File does not exist:', filename)
+        return
+
     # 4.2.3
     app.load_data(
         filename, format=get_specformat(filename), load_as_list=lal, data_label=label
     )
     # obj = get_spectrum(label)
     # app.load_data(obj, format=get_specformat(filename), load_as_list=lal, data_label=label, sources='*')
+
+    # resize the plot axes
+    if resize:
+        smart_resize(app)
 
 
 @solara.component
@@ -300,10 +317,39 @@ def load_app():
     error = None
     if filemap.value:
         label = list(filemap.value.keys())[0]
-        load_data(spec.value, filemap.value[label])
-        smart_resize(spec.value)
+        load_data(spec.value, filemap.value[label], resize=True)
 
     return app, error
+
+
+def consume_new_files():
+    """Consume new_files updates and clear the queue."""
+    if not new_files.value:
+        return
+
+    files = new_files.value
+
+    # make a new filemap with the new files
+    release = params.value.get("release", "IPL3")
+    incoming = {make_label(i): i for i in files if i and check_file_exists(i, release)}
+    if not incoming:
+        return
+
+    # check if the filemap was previously empty
+    empty_prior = not filemap.value
+
+    # merge the two dictionaries
+    merged = dict(filemap.value)
+    merged.update(incoming)
+    filemap.value = sort_filemap(merged)
+    sync_file_state()
+
+    # load the first data file if the viewer was empty before
+    if empty_prior and selected.value:
+        load_data(spec.value, filemap.value[selected.value[0]], resize=True)
+
+    # reset the new files
+    new_files.value = []
 
 
 @solara.component
@@ -353,7 +399,10 @@ def Page():
 
         Jdaviz()
 
+    # refresh available files when parent sends updateFiles postMessage
+    solara.use_effect(consume_new_files, [new_files.value])
+
     # with solara we have to use use_effect + get_widget to get the widget id
-    solara.use_effect(lambda: target_model_id.set(solara.get_widget(control)._model_id))
+    solara.use_effect(lambda: target_model_id.set(solara.get_widget(control)._model_id), [])
 
 Page()
