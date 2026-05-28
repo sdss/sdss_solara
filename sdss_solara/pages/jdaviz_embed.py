@@ -50,7 +50,7 @@ def get_url():
     if url:
         return url
 
-    env = os.getenv("VALIS_ENV") or os.getenv("SOLARA_ENV") or ""
+    env = os.getenv("VALIS_ENV") or os.getenv("SOLARA_ENV") or "development"
     name = (
         ".env.dev"
         if env.startswith("dev")
@@ -59,7 +59,7 @@ def get_url():
         else ".env.prod"
     )
     dotenv.load_dotenv(dotenv.find_dotenv(name))
-    return os.getenv("VALIS_API_URL")
+    return os.getenv("VALIS_API_URL") or "http://localhost:8000"
 
 
 api_url = get_url()
@@ -204,7 +204,7 @@ def DataSelect():
         if not resp.ok:
             return []
 
-        vals = {make_label(i): i for i in resp.json()["files"].values()}
+        vals = {make_label(i): i for i in sum(resp.json()["files"].values(), [])}
         filemap.value = sort_filemap(vals) if not set(vals) == {""} else {}
         sync_file_state()
         return list(all_files.value)
