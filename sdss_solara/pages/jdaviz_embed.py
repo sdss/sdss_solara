@@ -12,6 +12,7 @@ from jdaviz.app import Application
 from sdss_access import Access
 from specutils import Spectrum, SpectrumList
 from ipypopout import PopoutButton
+from astropy.io import fits
 
 from sdss_solara.components.common import create_shared_widgets, css
 from sdss_solara.components.message import (
@@ -247,11 +248,39 @@ def load_data(app: Application, filename: str, resize: bool = False):
         return
 
     # 4.2.3
-    app.load_data(
-        filename, format=get_specformat(filename), load_as_list=lal, data_label=label
-    )
+    # app.load_data(
+    #     filename, format=get_specformat(filename), load_as_list=lal, data_label=label
+    # )
     # obj = get_spectrum(label)
     # app.load_data(obj, format=get_specformat(filename), load_as_list=lal, data_label=label, sources='*')
+
+    multispec = False
+    if lal:
+        with fits.open(filename) as hdu:
+            tmp = [(len(i.data)>=1, i.data.shape[0]>1) for i in hdu[1:]]
+            ext_has_data, multi_spec_per_ext = zip(*tmp)
+            multispec = any([any(i) for i in tmp])
+
+    # 4.5.1
+    ldr = app.loaders['object']
+    if multispec:
+        try:
+            s = SpectrumList.read(filename, format=get_specformat(filename))
+            fmt = '1D Spectrum List'
+        except ValueError:
+            s = Spectrum.read(filename, format=get_specformat(filename))
+            fmt = '1D Spectrum'
+    else:
+        s = Spectrum.read(filename, format=get_specformat(filename))
+        fmt = '1D Spectrum'
+    ldr.object = s
+    if multispec and '1D Spectrum List' in ldr.format.choices:
+        ldr.format = fmt
+        ldr.importer.sources='*'
+    else:
+        ldr.format = fmt
+    ldr.importer.data_label=label
+    ldr.load()
 
     # resize the plot axes
     if resize:
