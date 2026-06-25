@@ -26,7 +26,7 @@ dependencies = [
   "markdown",
   "solara[all]>=1.57.6,<1.58.0",
   "solara-ui[all]>=1.57.6,<1.58.0",
-  "sdss_explorer@git+https://github.com/sdss/explorer.git#egg=solarabump",
+  "sdss_explorer@git+https://github.com/sdss/explorer.git@solarabump",
   "photutils>1.13",
   "jdaviz==4.5.2",
   "specutils>=2.4.0",
