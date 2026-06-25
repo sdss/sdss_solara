@@ -108,6 +108,12 @@ def get_specformat(filepath: str) -> str:
     elif fnmatch.fnmatch(filepath, "*astra/*/mwmVisit*"):
         # loads all extensions
         return "SDSS-V mwm"
+    elif fnmatch.fnmatch(filepath, "*astra/*/astraStar*"):
+        # loads all extensions
+        return "SDSS-V astra"
+    elif fnmatch.fnmatch(filepath, "*astra/*/astraVisit*"):
+        # loads all extensions
+        return "SDSS-V astra"
     elif fnmatch.fnmatch(filepath, "*dr17/manga/*LOGCUBE*"):
         # loads all extensions
         return "MaNGA cube"
