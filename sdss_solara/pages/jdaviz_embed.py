@@ -253,13 +253,6 @@ def load_data(app: Application, filename: str, resize: bool = False):
         print('File does not exist:', filename)
         return
 
-    # 4.2.3
-    # app.load_data(
-    #     filename, format=get_specformat(filename), load_as_list=lal, data_label=label
-    # )
-    # obj = get_spectrum(label)
-    # app.load_data(obj, format=get_specformat(filename), load_as_list=lal, data_label=label, sources='*')
-
     multispec = False
     if lal:
         with fits.open(filename) as hdu:
