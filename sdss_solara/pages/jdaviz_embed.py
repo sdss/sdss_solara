@@ -256,7 +256,7 @@ def load_data(app: Application, filename: str, resize: bool = False):
     multispec = False
     if lal:
         with fits.open(filename) as hdu:
-            tmp = [(len(i.data)>=1, i.data.shape[0]>1) for i in hdu[1:]]
+            tmp = [(len(i.data)>=1, i.data.shape[0]>1) for i in hdu[1:] if i.data is not None]
             ext_has_data, multi_spec_per_ext = zip(*tmp)
             multispec = any([any(i) for i in tmp])
 
