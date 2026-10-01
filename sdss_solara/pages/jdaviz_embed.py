@@ -437,7 +437,6 @@ def consume_apmadgics():
     idx = apmadgics_input.value.get("idx")
     mjd = apmadgics_input.value.get("mjd")
     star_prior = apmadgics_input.value.get("star_prior")
-    idx = np.random.randint(1, 100)
     spectrum = get_madgic_spectrum(magicid=idx, star_prior=star_prior)
 
     # get app
