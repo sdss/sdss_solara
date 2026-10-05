@@ -4,6 +4,7 @@ import pathlib
 import urllib
 
 import dotenv
+import h5py
 import numpy as np
 import requests
 import solara
@@ -13,12 +14,15 @@ from sdss_access import Access
 from specutils import Spectrum, SpectrumList
 from ipypopout import PopoutButton
 from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.units import Unit
 
 from sdss_solara.components.common import create_shared_widgets, css
 from sdss_solara.components.message import (
     Message,
     event_handler,
     new_files,
+    apmadgics_input,
     outmsg,
     set_initial_theme,
 )
@@ -380,6 +384,74 @@ def consume_new_files():
     new_files.value = []
 
 
+def get_madgic_spectrum(magicid: int = None, star_prior: str = 'dd',
+                        vers: str = 'v2024_03_16', release: str = 'DR19'):
+    """Get an apMADGICS spectrum for a given sdss_id, magic index
+
+    This (needlessly?) recreates some functionality in valis to build a spectrum.
+    An alternative is instead to make a valis api request to target/apmadgics/{sdss_id}
+
+    """
+
+    # build the file path
+    access = Access(release=release)
+    path = access.full('apMADGICS_out_apVisit_v0', star_prior_type=star_prior, vers=vers)
+
+    if not path:
+        raise FileNotFoundError("The apMADGICS_out_apVisit_v0 file could not be found.")
+
+    # build the wavelength array
+    n_wave = 8700
+    hdr = {'CTYPE1': 'WAVE-LOG',
+            'CUNIT1': 'Angstrom',
+            'CRVAL1': 15074.74588598709,
+            'CDELT1': 0.20826531094648318,
+            'NAXIS1': n_wave,
+            'CRPIX1': 1,
+            'PC1_1': 1.0,
+            'RESTWAV': 15074.74588598709}
+    wcs = WCS(header=hdr)
+
+    # create the output
+    data = {"wavelength": wcs.pixel_to_world(np.arange(n_wave)).to('Angstrom').value,
+            "unit_wavelength": "Angstrom",
+            "unit_flux": "1e-17 erg / (Angstrom cm2 s)"}
+
+    # read the spectrum
+    with h5py.File(path, "r") as hh:
+        dd = hh["apVisit_v0"]
+
+        # it is 1-indexed in the allVisit
+        data["flux"] = dd[magicid - 1]
+        return Spectrum(spectral_axis=data["wavelength"] * Unit(data["unit_wavelength"]),
+                        flux=data["flux"] * Unit(data["unit_flux"]))
+
+
+def consume_apmadgics():
+    """Process an incoming request to display an apMADGICS spectrum"""
+    if not apmadgics_input.value:
+        return
+
+    # extract parameters from the incoming request
+    sdss_id = apmadgics_input.value.get("sdssid")
+    idx = apmadgics_input.value.get("idx")
+    mjd = apmadgics_input.value.get("mjd")
+    star_prior = apmadgics_input.value.get("star_prior")
+    spectrum = get_madgic_spectrum(magicid=idx, star_prior=star_prior)
+
+    # get app
+    app = spec.value
+    # 4.5.1
+    ldr = app.loaders['object']
+    ldr.object = spectrum
+    ldr.format = '1D Spectrum'
+    ldr.importer.data_label=f"apMADGICS_{star_prior}_visit_{sdss_id}_{mjd}"
+    ldr.load()
+
+    # reset
+    apmadgics_input.value = {}
+
+
 @solara.component
 def Jdaviz():
     """component for displaying Jdaviz"""
@@ -429,6 +501,9 @@ def Page():
 
     # refresh available files when parent sends updateFiles postMessage
     solara.use_effect(consume_new_files, [new_files.value])
+
+    # load apMADGICS spectrum when parent sends loadApMadgics postMessage
+    solara.use_effect(consume_apmadgics, [apmadgics_input.value])
 
     # with solara we have to use use_effect + get_widget to get the widget id
     solara.use_effect(lambda: target_model_id.set(solara.get_widget(control)._model_id), [])

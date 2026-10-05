@@ -7,6 +7,8 @@ import solara
 outmsg = solara.Reactive[dict]({})
 # variable for storing incoming file updates from the parent
 new_files = solara.Reactive[list]([])
+# variable for storing incoming apmadgics request info
+apmadgics_input = solara.Reactive[dict]({})
 
 
 @solara.component_vue('message.vue')
@@ -36,6 +38,13 @@ def event_handler(data: dict):
     elif event_type == 'updateFiles':
         new_files.value = data.get('files') or []
         outmsg.value = {'type': 'success', 'message': 'Files updated successfully'}
+    elif event_type == 'loadApMadgics':
+        apmadgics_input.value = {'sdssid': data.get("sdssid"),
+                                 'idx': data.get("idx"),
+                                 'mjd': data.get("mjd"),
+                                 "plate": data.get("plate"),
+                                 "star_prior": data.get("star_prior"),}
+        outmsg.value = {"type": "success", "message": "ApMadgics request received"}
 
 
 def set_initial_theme(params: solara.Reactive[dict] = None):
