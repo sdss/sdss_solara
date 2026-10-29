@@ -1,6 +1,6 @@
 import solara
 
-from sdss_solara.pages.fixpatch
+import sdss_solara.pages.fixpatch
 from sdss_solara.pages.jdaviz_embed import Page as Embed
 from sdss_explorer.dashboard import Page as Dashboard, Layout as DashLayout
 from sdss_solara.components.message import Message, event_handler, set_initial_theme
